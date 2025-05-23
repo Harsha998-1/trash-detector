@@ -11,17 +11,27 @@
       max-width: 480px;
       margin: auto;
       text-align: center;
+      background: #f9f9f9;
     }
     video {
       width: 100%;
       border: 1px solid #ccc;
       border-radius: 8px;
+      background: black;
     }
     button {
       margin-top: 10px;
       padding: 10px 15px;
       font-size: 16px;
       cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    button:disabled {
+      background: #999;
+      cursor: not-allowed;
     }
     #preview {
       margin-top: 10px;
@@ -29,20 +39,30 @@
       border-radius: 8px;
       display: none;
       width: 100%;
+      max-height: 300px;
+      object-fit: contain;
     }
     #status {
       margin-top: 15px;
       font-weight: bold;
       color: green;
+      min-height: 20px;
+    }
+    #location {
+      margin-top: 10px;
+      font-style: italic;
+      color: #555;
     }
   </style>
 </head>
 <body>
   <h1>Trash Detection</h1>
-  <video id="camera" autoplay playsinline></video>
-  <button onclick="capturePhoto()">📸 Capture Photo</button>
-  <img id="preview" />
+  <video id="camera" autoplay playsinline></video><br/>
+  <button id="captureBtn" onclick="capturePhoto()">📸 Capture Photo</button>
+  <img id="preview" alt="Captured Image Preview" />
   <p id="status"></p>
+  <p id="location"></p>
+
   <script src="script.js"></script>
 </body>
 </html>

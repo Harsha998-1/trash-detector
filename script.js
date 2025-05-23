@@ -1,47 +1,40 @@
-// Get elements
-const statusDiv = document.getElementById("status");
+const video = document.getElementById('camera');
+const preview = document.getElementById('preview');
+const statusText = document.getElementById('status');
 
-// Capture photo and location
-async function handleCapture() {
-  statusDiv.textContent = "Processing...";
-
-  try {
-    // Step 1: Get photo from camera
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    const video = document.createElement("video");
-    video.srcObject = stream;
-    await video.play();
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = canvas.toDataURL("image/png");
-    stream.getTracks().forEach(track => track.stop());
-
-    // Step 2: Get location
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const lat = position.coords.latitude;
-      const lon = position.coords.longitude;
-
-      // Reverse geocode (OpenCage or Google Maps API)
-      const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=66e9e5abc32e4e67b1efbc368091ffa2`);
-      const data = await response.json();
-      const locationName = data.results[0].formatted;
-
-      // Step 3: Send to "AI" (dummy logic for now)
-      const isTrash = Math.random() < 0.5; // Dummy condition. Replace with real ML model later.
-
-      statusDiv.textContent = isTrash
-        ? `🚮 Trash Detected at ${locationName}`
-        : `✅ Clean Area at ${locationName}`;
+// Try to access back camera (environment facing)
+navigator.mediaDevices.getUserMedia({
+  video: { facingMode: { exact: "environment" } },
+  audio: false
+})
+.then(stream => {
+  video.srcObject = stream;
+})
+.catch(err => {
+  // Fallback: if exact back camera not available, try any camera
+  navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+    .then(stream => {
+      video.srcObject = stream;
+      statusText.textContent = "Using default camera.";
+    })
+    .catch(err => {
+      statusText.textContent = "Camera error: " + err.message;
     });
+});
 
-  } catch (error) {
-    console.error(error);
-    statusDiv.textContent = "Failed to process.";
-  }
+// Capture photo from video and show preview
+function capturePhoto() {
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const imageDataURL = canvas.toDataURL('image/jpeg');
+  preview.src = imageDataURL;
+  preview.style.display = 'block';
+
+  statusText.textContent = "Photo captured. Ready for trash classification.";
+  
+  // Here you can call your AI trash detection function with the imageDataURL
 }
-
-document.getElementById("cameraBtn").addEventListener("click", handleCapture);

@@ -2,15 +2,47 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Trash Detector</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Trash Detection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 480px;
+      margin: auto;
+      text-align: center;
+    }
+    video {
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    button {
+      margin-top: 10px;
+      padding: 10px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #preview {
+      margin-top: 10px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      display: none;
+      width: 100%;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+      color: green;
+    }
+  </style>
 </head>
 <body>
   <h1>Trash Detection</h1>
-  <button id="cameraBtn">📸 Capture Photo</button>
-  <div id="status">Status will appear here...</div>
-
+  <video id="camera" autoplay playsinline></video>
+  <button onclick="capturePhoto()">📸 Capture Photo</button>
+  <img id="preview" />
+  <p id="status"></p>
   <script src="script.js"></script>
 </body>
 </html>

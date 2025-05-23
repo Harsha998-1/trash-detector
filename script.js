@@ -1,41 +1,47 @@
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const status = document.getElementById('status');
-const captureBtn = document.getElementById('capture');
+// Get elements
+const statusDiv = document.getElementById("status");
 
-// Start camera
-navigator.mediaDevices.getUserMedia({ video: true })
-  .then(stream => {
+// Capture photo and location
+async function handleCapture() {
+  statusDiv.textContent = "Processing...";
+
+  try {
+    // Step 1: Get photo from camera
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    const video = document.createElement("video");
     video.srcObject = stream;
-  })
-  .catch(err => {
-    alert("Camera not working: " + err);
-  });
+    await video.play();
 
-captureBtn.addEventListener('click', async () => {
-  // Capture image
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  const image = canvas.toDataURL('image/png');
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = canvas.toDataURL("image/png");
+    stream.getTracks().forEach(track => track.stop());
 
-  // Get location
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const lat = pos.coords.latitude;
-      const lon = pos.coords.longitude;
+    // Step 2: Get location
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
 
-      // Fake detection (you can replace with real model later)
-      const types = ["Wet Waste", "Dry Waste", "Mixed Waste"];
-      const detected = types[Math.floor(Math.random() * types.length)];
+      // Reverse geocode (OpenCage or Google Maps API)
+      const response = await fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=66e9e5abc32e4e67b1efbc368091ffa2`);
+      const data = await response.json();
+      const locationName = data.results[0].formatted;
 
-      // Show message
-      status.innerText = `Trash detected: ${detected}\nLocation: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+      // Step 3: Send to "AI" (dummy logic for now)
+      const isTrash = Math.random() < 0.5; // Dummy condition. Replace with real ML model later.
 
-      // Here you would send image + location + detection to your server or Firebase
-      console.log({ image, lat, lon, detected });
+      statusDiv.textContent = isTrash
+        ? `🚮 Trash Detected at ${locationName}`
+        : `✅ Clean Area at ${locationName}`;
     });
-  } else {
-    status.innerText = "Location not supported.";
+
+  } catch (error) {
+    console.error(error);
+    statusDiv.textContent = "Failed to process.";
   }
-});
+}
+
+document.getElementById("cameraBtn").addEventListener("click", handleCapture);

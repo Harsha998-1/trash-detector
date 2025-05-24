@@ -69,7 +69,7 @@ async function capturePhoto() {
   captureBtn.disabled = false;
 
   // Send to Google Sheet via Apps Script
-  sendReport(imageDataURL, loc || "Not available", trashResult);
+  await uploadToSheet(imageDataURL, loc || "Not available");
 }
 
 async function fakeTrashDetection(imageBase64) {
@@ -85,7 +85,7 @@ async function getLocationName() {
   if (!navigator.geolocation) return null;
   try {
     const position = await new Promise((resolve, reject) => {
-      navigator.geolocation.getCurrentPosition(resolve, reject, {timeout: 10000});
+      navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 10000 });
     });
     const lat = position.coords.latitude;
     const lon = position.coords.longitude;
@@ -99,27 +99,20 @@ async function getLocationName() {
   }
 }
 
-function sendReport(imageUrl, location, trashType) {
-  const scriptURL = "https://script.google.com/a/macros/gitam.in/s/AKfycbwNT5oQQjUGsLYunfiMkW6nSpFVCRnKnGU69ARuF_XHBGaimKufqrZmleT2oep6L8RY/exec";
-
-  fetch(scriptURL, {
+// ✅ NEW FUNCTION TO SEND TO YOUR GOOGLE SHEET
+async function uploadToSheet(image, location) {
+  const response = await fetch("https://script.google.com/macros/s/AKfycbyX3ukeWY2KqXe7NeeRUb8f05BdOwuJcvgZn5qDnBqzWhs_gAv6TpqQhduTmH8pqXBCaw/exec", {
     method: "POST",
     body: JSON.stringify({
-      imageUrl: imageUrl,
-      location: location,
-      trashType: trashType
+      image: image,
+      location: location
     }),
     headers: {
       "Content-Type": "application/json"
     }
-  })
-  .then(response => response.text())
-  .then(data => {
-    console.log("Saved to Google Sheet:", data);
-    statusText.textContent += " | Report saved.";
-  })
-  .catch(error => {
-    console.error("Error saving to sheet:", error);
-    statusText.textContent += " | Failed to save report.";
   });
+
+  const result = await response.text();
+  console.log("Upload result:", result);
+  statusText.textContent += " | Report saved.";
 }

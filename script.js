@@ -483,3 +483,61 @@ class TrashVisionApp {
   
   showNotification(message, type = "success") {
       const notification = document.createElement('div');
+      notification.className = `notification ${type}`;
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+          notification.classList.add('fade-out');
+          setTimeout(() => notification.remove(), 300);
+      }, 3000);
+  }
+  
+  simulateAIAnalysis() {
+      // Simulate occasional AI analysis of the video feed
+      setInterval(() => {
+          if (!this.currentStream) return;
+          
+          // Randomly activate indicators to simulate real-time detection
+          if (Math.random() > 0.7) {
+              const types = ["plastic", "organic", "paper", "metal"];
+              const randomType = types[Math.floor(Math.random() * types.length)];
+              this.updateAIIndicators(randomType);
+          }
+      }, 3000);
+  }
+  
+  saveToLocalStorage(photo) {
+      // In a real app, you would save to IndexedDB or a proper backend
+      console.log("Photo saved (simulated):", photo);
+  }
+  
+  setupServiceWorker() {
+      if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js')
+              .then(reg => console.log('Service Worker registered', reg))
+              .catch(err => console.error('Service Worker registration failed', err));
+      }
+  }
+  
+  checkPWA() {
+      // Check if app is running as PWA
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+          console.log("Running as PWA");
+      }
+  }
+  
+  showPhotoModal(photo) {
+      // Would implement a modal to show enlarged photo with details
+      console.log("Showing photo details:", photo);
+      this.showNotification(`Showing details for photo #${photo.id}`);
+  }
+}
+
+// Initialize the app when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  const app = new TrashVisionApp();
+  
+  // Make app available globally for debugging
+  window.app = app;
+});

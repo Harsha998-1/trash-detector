@@ -1,51 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trash Detection System</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AI-Powered Trash Detection System">
+    <title>GC's TrashVision | AI Waste Detection</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Trash Detection System</h1>
-            <p class="subtitle">Capture photos to identify waste types</p>
-        </header>
+    <div class="app-container">
+        <!-- Augmented Reality Overlay -->
+        <div class="ar-overlay"></div>
+        
+        <!-- Main App Interface -->
+        <div class="app-header">
+            <h1><i class="fas fa-recycle"></i> TrashVision AI</h1>
+            <p class="subtitle">Next-gen waste detection powered by AI</p>
+            <div class="watermark">MADE BY GC REDDY</div>
+        </div>
 
-        <main>
-            <div class="camera-container">
-                <video id="camera" autoplay playsinline></video>
-                <div class="button-group">
-                    <button id="captureBtn" class="btn-primary">Capture Photo</button>
-                    <button id="switchBtn" class="btn-secondary">Switch Camera</button>
+        <main class="app-main">
+            <!-- Camera Feed Section -->
+            <div class="camera-section">
+                <div class="camera-container">
+                    <video id="camera" autoplay playsinline></video>
+                    <div class="camera-controls">
+                        <button id="captureBtn" class="btn-primary">
+                            <i class="fas fa-camera"></i> Capture
+                        </button>
+                        <button id="switchBtn" class="btn-secondary">
+                            <i class="fas fa-sync-alt"></i> Switch
+                        </button>
+                        <button id="flashBtn" class="btn-secondary">
+                            <i class="fas fa-bolt"></i> Flash
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Real-time AI Detection Indicators -->
+                <div class="ai-indicators">
+                    <div class="indicator plastic"><i class="fas fa-water-bottle"></i></div>
+                    <div class="indicator organic"><i class="fas fa-apple-alt"></i></div>
+                    <div class="indicator paper"><i class="fas fa-newspaper"></i></div>
+                    <div class="indicator metal"><i class="fas fa-cog"></i></div>
                 </div>
             </div>
 
-            <div class="preview-container">
-                <img id="preview" alt="Captured Image Preview" />
-                <div class="result-container">
-                    <div class="result-item">
-                        <span class="result-label">Detection Result:</span>
-                        <span id="status" class="result-value">Ready</span>
+            <!-- Results Dashboard -->
+            <div class="dashboard">
+                <div class="stats-panel">
+                    <div class="stat-item">
+                        <span class="stat-value" id="photosCount">0</span>
+                        <span class="stat-label">Photos</span>
                     </div>
-                    <div class="result-item">
-                        <span class="result-label">Location:</span>
-                        <span id="location" class="result-value">Not detected</span>
+                    <div class="stat-item">
+                        <span class="stat-value" id="trashCount">0</span>
+                        <span class="stat-label">Trash Items</span>
                     </div>
-                    <div class="result-item">
-                        <span class="result-label">Timestamp:</span>
-                        <span id="timestamp" class="result-value">-</span>
+                    <div class="stat-item">
+                        <span class="stat-value" id="cleanScore">100%</span>
+                        <span class="stat-label">Clean Score</span>
                     </div>
                 </div>
+
+                <!-- Captured Photos Grid -->
+                <div class="results-header">
+                    <h2><i class="fas fa-images"></i> Detection History</h2>
+                    <button id="exportBtn" class="btn-export">
+                        <i class="fas fa-file-export"></i> Export Data
+                    </button>
+                </div>
+                <div id="photosGrid" class="photos-grid"></div>
             </div>
         </main>
 
-        <footer>
-            <p>Trash Detection System &copy; 2023</p>
+        <!-- App Footer -->
+        <footer class="app-footer">
+            <div class="status-container">
+                <div class="status-item">
+                    <span class="status-label">System Status:</span>
+                    <span id="status" class="status-value ready"><i class="fas fa-circle"></i> Ready</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Location:</span>
+                    <span id="location"><i class="fas fa-map-marker-alt"></i> Detecting...</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">Last Update:</span>
+                    <span id="timestamp"><i class="fas fa-clock"></i> Just now</span>
+                </div>
+            </div>
+            <div class="footer-note">
+                <p>TrashVision AI &copy; 2023 | MADE BY GC REDDY</p>
+            </div>
         </footer>
     </div>
 
+    <!-- Modals -->
+    <div id="loadingModal" class="modal">
+        <div class="modal-content">
+            <div class="spinner"></div>
+            <p id="loadingText">Initializing AI System...</p>
+        </div>
+    </div>
+
+    <div id="exportModal" class="modal">
+        <div class="modal-content">
+            <h3>Export Options</h3>
+            <button class="export-option" data-type="csv">
+                <i class="fas fa-file-csv"></i> CSV Report
+            </button>
+            <button class="export-option" data-type="pdf">
+                <i class="fas fa-file-pdf"></i> PDF Report
+            </button>
+            <button class="export-option" data-type="json">
+                <i class="fas fa-file-code"></i> JSON Data
+            </button>
+            <button id="closeExportModal" class="btn-secondary">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered');
+                    }).catch(err => {
+                        console.log('ServiceWorker registration failed: ', err);
+                    });
+            });
+        }
+    </script>
+
     <script src="script.js"></script>
+    <script src="ai.js"></script>
 </body>
 </html>

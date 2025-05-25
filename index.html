@@ -1,68 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Trash Detection</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      max-width: 480px;
-      margin: auto;
-      text-align: center;
-      background: #f9f9f9;
-    }
-    video {
-      width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      background: black;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 15px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-    button:disabled {
-      background: #999;
-      cursor: not-allowed;
-    }
-    #preview {
-      margin-top: 10px;
-      border: 1px solid #333;
-      border-radius: 8px;
-      display: none;
-      width: 100%;
-      max-height: 300px;
-      object-fit: contain;
-    }
-    #status {
-      margin-top: 15px;
-      font-weight: bold;
-      color: green;
-      min-height: 20px;
-    }
-    #location {
-      margin-top: 10px;
-      font-style: italic;
-      color: #555;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trash Detection System</title>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <h1>Trash Detection</h1>
-  <video id="camera" autoplay playsinline></video><br/>
-  <button id="captureBtn" onclick="capturePhoto()">📸 Capture Photo</button>
-  <img id="preview" alt="Captured Image Preview" />
-  <p id="status"></p>
-  <p id="location"></p>
+    <div class="container">
+        <header>
+            <h1>Trash Detection System</h1>
+            <p class="subtitle">Capture photos to identify waste types</p>
+        </header>
 
-  <script src="script.js"></script>
+        <main>
+            <div class="camera-container">
+                <video id="camera" autoplay playsinline></video>
+                <div class="button-group">
+                    <button id="captureBtn" class="btn-primary">Capture Photo</button>
+                    <button id="switchBtn" class="btn-secondary">Switch Camera</button>
+                </div>
+            </div>
+
+            <div class="preview-container">
+                <img id="preview" alt="Captured Image Preview" />
+                <div class="result-container">
+                    <div class="result-item">
+                        <span class="result-label">Detection Result:</span>
+                        <span id="status" class="result-value">Ready</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Location:</span>
+                        <span id="location" class="result-value">Not detected</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Timestamp:</span>
+                        <span id="timestamp" class="result-value">-</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Trash Detection System &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>

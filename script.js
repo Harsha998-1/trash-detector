@@ -1,18 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
   // DOM Elements
   const video = document.getElementById('camera');
-  const preview = document.getElementById('preview');
+  const captureBtn = document.getElementById('captureBtn');
+  const switchBtn = document.getElementById('switchBtn');
   const statusText = document.getElementById('status');
   const locationText = document.getElementById('location');
   const timestampText = document.getElementById('timestamp');
-  const captureBtn = document.getElementById('captureBtn');
-  const switchBtn = document.getElementById('switchBtn');
-  const previewContainer = document.querySelector('.preview-container');
+  const photosGrid = document.getElementById('photosGrid');
 
   // App state
   let currentStream = null;
   let facingMode = "environment"; // Default to rear camera
-  let capturedPhoto = null;
 
   // Initialize the app
   init();
@@ -49,7 +47,8 @@ document.addEventListener('DOMContentLoaded', () => {
           currentStream = await navigator.mediaDevices.getUserMedia(constraints);
           video.srcObject = currentStream;
 
-          statusText.textContent = "Camera ready";
+          statusText.textContent = "Camera ready - Tap Capture Photo";
+          statusText.className = "success";
           captureBtn.disabled = false;
           switchBtn.disabled = false;
       } catch (err) {
@@ -91,16 +90,20 @@ document.addEventListener('DOMContentLoaded', () => {
           const ctx = canvas.getContext('2d');
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-          // Store the captured photo
-          capturedPhoto = canvas.toDataURL('image/jpeg');
-          preview.src = capturedPhoto;
-
-          // Show preview and hide camera
-          video.style.display = 'none';
-          previewContainer.style.display = 'block';
-
-          // Process the photo
-          await processPhoto();
+          // Get the image data
+          const imageDataURL = canvas.toDataURL('image/jpeg');
+          
+          // Process the photo (get location and detection)
+          const result = await processPhoto(imageDataURL);
+          
+          // Add the photo to the grid
+          addPhotoToGrid(imageDataURL, result);
+          
+          // Re-enable buttons
+          captureBtn.disabled = false;
+          switchBtn.disabled = false;
+          statusText.textContent = "Photo captured! Ready for next capture";
+          statusText.className = "success";
       } catch (err) {
           console.error("Capture error:", err);
           statusText.textContent = "Error capturing photo";
@@ -110,34 +113,47 @@ document.addEventListener('DOMContentLoaded', () => {
       }
   }
 
-  async function processPhoto() {
-      statusText.textContent = "Analyzing image...";
-      
+  async function processPhoto(imageDataURL) {
+      const result = {
+          location: "Detecting...",
+          timestamp: new Date().toLocaleString(),
+          detection: "Analyzing..."
+      };
+
       try {
-          // Get location first
-          const location = await getLocationName();
-          locationText.textContent = location || "Location not available";
-
-          // Set timestamp
-          const now = new Date();
-          timestampText.textContent = now.toLocaleString();
-
-          // Simulate trash detection (replace with actual API call)
-          const detectionResult = await detectTrash(capturedPhoto);
+          // Get location
+          result.location = await getLocationName() || "Location not available";
           
-          statusText.textContent = detectionResult.message;
-          statusText.className = detectionResult.status;
+          // Simulate trash detection
+          const detectionResult = await detectTrash(imageDataURL);
+          result.detection = detectionResult.message;
+          result.status = detectionResult.status;
       } catch (err) {
           console.error("Processing error:", err);
-          statusText.textContent = "Error processing image";
-          statusText.className = "error";
-      } finally {
-          captureBtn.disabled = false;
-          switchBtn.disabled = false;
+          result.detection = "Analysis failed";
+          result.status = "error";
       }
+
+      return result;
   }
 
-  // Trash detection simulation (replace with real API call)
+  function addPhotoToGrid(imageDataURL, photoInfo) {
+      const photoElement = document.createElement('div');
+      photoElement.className = 'captured-photo';
+      
+      photoElement.innerHTML = `
+          <img src="${imageDataURL}" alt="Captured photo">
+          <div class="photo-info">
+              <div>${photoInfo.detection}</div>
+              <div>${photoInfo.location}</div>
+              <div>${photoInfo.timestamp}</div>
+          </div>
+      `;
+      
+      photosGrid.insertBefore(photoElement, photosGrid.firstChild);
+  }
+
+  // Trash detection simulation
   async function detectTrash(imageData) {
       // Simulate API call delay
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -148,20 +164,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (random < 0.2) {
           return {
               status: "success",
-              message: "No trash detected. Area is clean!"
+              message: "Clean - No trash"
           };
       } else if (random < 0.5) {
           return {
               status: "warning",
-              message: "Small amount of trash detected"
+              message: "Small trash detected"
           };
       } else {
-          const trashTypes = ["Plastic waste", "Organic waste", "Paper waste", "Metal waste", "Mixed waste"];
+          const trashTypes = ["Plastic", "Organic", "Paper", "Metal", "Mixed"];
           const randomType = trashTypes[Math.floor(Math.random() * trashTypes.length)];
           
           return {
               status: "error",
-              message: `Trash detected: ${randomType}`
+              message: `Trash: ${randomType}`
           };
       }
   }
@@ -201,15 +217,5 @@ document.addEventListener('DOMContentLoaded', () => {
           console.error("Geolocation error:", err);
           return "Location detection failed";
       }
-  }
-
-  // Reset function (could be added to a reset button)
-  function resetCamera() {
-      video.style.display = 'block';
-      previewContainer.style.display = 'none';
-      statusText.textContent = "Camera ready";
-      statusText.className = "";
-      locationText.textContent = "Not detected";
-      timestampText.textContent = "-";
   }
 });

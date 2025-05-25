@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trash Detection System</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
     <div class="container">
@@ -22,23 +22,21 @@
                 </div>
             </div>
 
-            <div id="resultsContainer">
-                <h2>Captured Photos</h2>
-                <div id="photosGrid"></div>
-            </div>
-
-            <div class="status-container">
-                <div class="status-item">
-                    <span>Status:</span>
-                    <span id="status">Ready</span>
-                </div>
-                <div class="status-item">
-                    <span>Location:</span>
-                    <span id="location">Not detected</span>
-                </div>
-                <div class="status-item">
-                    <span>Timestamp:</span>
-                    <span id="timestamp">-</span>
+            <div class="preview-container">
+                <img id="preview" alt="Captured Image Preview" />
+                <div class="result-container">
+                    <div class="result-item">
+                        <span class="result-label">Detection Result:</span>
+                        <span id="status" class="result-value">Ready</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Location:</span>
+                        <span id="location" class="result-value">Not detected</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Timestamp:</span>
+                        <span id="timestamp" class="result-value">-</span>
+                    </div>
                 </div>
             </div>
         </main>
